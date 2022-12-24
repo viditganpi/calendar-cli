@@ -10,9 +10,10 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 class Calendar():
+    creds = None
+
     def __init__(self):
         self.SCOPES = ['https://www.googleapis.com/auth/calendar']
-        self.creds = None
 
     def login(self):
         # The file token.json stores the user's access and refresh tokens, and is
@@ -24,14 +25,39 @@ class Calendar():
         # If there are no (valid) credentials available, let the user log in.
         if not self.creds or not self.creds.valid:
             if self.creds and self.creds.expired and self.creds.refresh_token:
-                creds.refresh(Request())
+                self.creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     'credentials.json', self.SCOPES)
-                creds = flow.run_local_server(port=0)
+                #TODO: see if this can be replaced by own url
+                self.creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
             with open('token.json', 'w') as token:
-                token.write(creds.to_json())
+                token.write(self.creds.to_json())
 
-    def get_calendar():
-        pass
+    def get_calendar(self):
+        if self.creds == None:
+            self.login()
+
+        try:
+            service = build('calendar', 'v3', credentials=self.creds)
+
+            # Call the Calendar API
+            now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
+            print('Getting the upcoming 10 events')
+            events_result = service.events().list(calendarId='primary', timeMin=now,
+                                                maxResults=10, singleEvents=True,
+                                                orderBy='startTime').execute()
+            events = events_result.get('items', [])
+
+            if not events:
+                print('No upcoming events found.')
+                return
+
+            # Prints the start and name of the next 10 events
+            for event in events:
+                start = event['start'].get('dateTime', event['start'].get('date'))
+                print(start, event['summary'])
+
+        except HttpError as error:
+            print('An error occurred: %s' % error)

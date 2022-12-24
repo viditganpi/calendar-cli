@@ -11,9 +11,10 @@ def login():
     calendar_instance.login()
 
 @click.command()
-def get_calendar():
+@click.option("--count", default=10, help="Count of future events you want to see")
+def get_calendar(count):
     calendar_instance = calendar.Calendar()
-    calendar_instance.get_calendar()
+    calendar_instance.get_calendar(count)
 
 cli.add_command(login)
 cli.add_command(get_calendar)

@@ -36,7 +36,7 @@ class Calendar():
             with open('token.json', 'w') as token:
                 token.write(self.creds.to_json())
 
-    def get_calendar(self):
+    def get_calendar(self, count_events):
         if self.creds == None:
             self.login()
 
@@ -45,9 +45,9 @@ class Calendar():
 
             # Call the Calendar API
             now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-            print('Getting the upcoming 10 events')
+            print(f'Getting the upcoming {count_events} events')
             events_result = service.events().list(calendarId='primary', timeMin=now,
-                                                maxResults=10, singleEvents=True,
+                                                maxResults=count_events, singleEvents=True,
                                                 orderBy='startTime').execute()
             events = events_result.get('items', [])
 

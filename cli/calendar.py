@@ -66,3 +66,29 @@ class Calendar():
 
         except HttpError as error:
             print('An error occurred: %s' % error)
+
+    def list_calendars(self):
+        if self.creds == None:
+            self.login()
+
+        try:
+            service = build('calendar', 'v3', credentials=self.creds)
+            calendar_results = service.calendarList().list().execute()
+            calendars = calendar_results.get('items', [])
+
+            if not calendars:
+                print("No calendars found")
+                return
+            
+            calendar_headers = ["Id", "Summary", "Timezone"]
+            calendar_list = [calendar_headers]
+            for calendar in calendars:
+                id = calendar.get("id", "")
+                summary = calendar.get("summary", "")
+                timezone = calendar.get("timeZone", "")
+                calendar_list.append([id, summary, timezone])
+            print(tabulate(calendar_list, headers="firstrow", tablefmt="rounded_grid"))
+        
+        except HttpError as error:
+            print("An error occured while fetching calendars: %s" % error)
+

@@ -36,7 +36,7 @@ class Calendar():
             with open('token.json', 'w') as token:
                 token.write(self.creds.to_json())
 
-    def get_calendar(self, count_events):
+    def get_events(self, count_events):
         if self.creds == None:
             self.login()
 

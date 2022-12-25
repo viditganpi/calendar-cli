@@ -12,9 +12,10 @@ def login():
 
 @click.command()
 @click.option("--count", default=10, help="Count of future events you want to see")
-def get_events(count):
+@click.option("--calendar-id", default="primary", help="Id of calendar to fetch events from")
+def get_events(count, calendar_id):
     calendar_instance = calendar.Calendar()
-    calendar_instance.get_events(count)
+    calendar_instance.get_events(count, calendar_id)
 
 @click.command()
 def list_calendars():

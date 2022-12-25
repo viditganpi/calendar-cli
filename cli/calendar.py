@@ -36,7 +36,7 @@ class Calendar():
             with open('token.json', 'w') as token:
                 token.write(self.creds.to_json())
 
-    def get_events(self, count_events):
+    def get_events(self, count_events, calendar_id):
         if self.creds == None:
             self.login()
 
@@ -46,7 +46,7 @@ class Calendar():
             # Call the Calendar API
             now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
             print(f'Getting the upcoming {count_events} events')
-            events_result = service.events().list(calendarId='primary', timeMin=now,
+            events_result = service.events().list(calendarId=calendar_id, timeMin=now,
                                                 maxResults=count_events, singleEvents=True,
                                                 orderBy='startTime').execute()
             events = events_result.get('items', [])
@@ -58,8 +58,8 @@ class Calendar():
             event_summaries = [["Start time", "End time", "Time Zone", "Details"]]
             # Prints the start and name of the next 10 events
             for event in events:
-                start = event['start'].get('dateTime')
-                finish = event['end'].get('dateTime')
+                start = event['start'].get('dateTime', event['start'].get("date"))
+                finish = event['end'].get('dateTime', event['end'].get("date"))
                 zone = event['start'].get('timeZone')
                 event_summaries.append([start, finish, zone, event['summary']])
             print(tabulate(event_summaries, headers="firstrow", tablefmt="rounded_grid"))
